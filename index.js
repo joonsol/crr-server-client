@@ -5,69 +5,92 @@ const PORT = 3000
 app.use(express.json())
 
 
-let users = [
-    { id: 1, name: "홍길동" },
-    { id: 2, name: "김철수" },
-    { id: 3, name: "홍경복" }
-]
 
+let boards = []
+let initId = 1
 
-app.post("/users", (req, res) => {
+app.post("/boards", (req, res) => {
     try {
-        const newUser = req.body;
-
-        users.push({ id: Date.now(), ...newUser })
-        res.status(201).json({ message: "사용자목록 업로드", users })
+        const newBoard = {
+            id: initId++,
+            displayId:boards.length+1,
+            title: req.body.title,
+            content: req.body.content,
+            createdAt: new Date().toISOString()
+        }
+        boards.push(newBoard)
+        res.status(201).json({
+            message: "게시글 생성 완료",
+            board: newBoard
+        })
     } catch (error) {
-        console.error("사용자 목록 추가중 오류", error)
-        res.status(500).json({ message: "서버 내부 오류발생" })
+        res.status(500).json({ message: "서버 오류" })
     }
 })
 
-app.get("/users", (req, res) => {
+app.get("/boards", (req, res) => {
     try {
-        res.json(users)
+        res.status(200).json({ message: "요청 성공", boards })
 
-        res.status(201).json({ message: "성공적 가져오기" })
     } catch (error) {
-        console.error("사용자 목록 조회중 오류", error)
-        res.status(500).json({ message: "서버 내부 오류발생" })
+        res.status(500).json({ message: "서버 오류" })
+
     }
 })
-
-app.put("/users/:id", (req, res) => {
+app.get("/boards/:id", (req, res) => {
     try {
         const userId = Number(req.params.id)
-        const index = users.findIndex(u=>u.id===userId)
+        const index = boards.findIndex(u => u.id === userId)
 
-        if(index===-1){
-            return res.status(404).json({message:"수정할 사용자가 없습니다."})
+        if (index == -1) {
+            return res.status(404).json({ message: "게시글을 찾을수 없습니다." })
         }
-        const updatedData =req.body
-
-        users[index]={...users[index],...updatedData}
-        res.json({message:"사용자 수정 완료",user:users[index]})
+        res.status(200).json({ message: "게시글 가져오기요청 성공", boards: boards[index] })
 
     } catch (error) {
-        console.error("사용자 목록 조회중 오류", error)
-        res.status(500).json({ message: "서버 내부 오류발생" })
+        res.status(500).json({ message: "서버 오류" })
+
     }
 })
-app.delete("/users/:id", (req, res) => {
+app.put("/boards/:id", (req, res) => {
     try {
         const userId = Number(req.params.id)
-        const index = users.findIndex(u=>u.id===userId)
 
-        if(index===-1){
-            return res.status(404).json({message:"수정할 사용자가 없습니다."})
+        const index = boards.findIndex(u => u.id === userId)
+
+        if (index == -1) {
+            return res.status(404).json({ message: "게시글을 찾을수 없습니다." })
         }
+        const updatedData = req.body;
+        boards[index] = { ...boards[index], ...updatedData }
 
-        users.splice(index,1)
-        res.json({message:"사용자 삭제 완료",users})
+        res.status(200).json({ message: "정보 수정 성공", boards: boards[index] })
 
     } catch (error) {
-        console.error("사용자 목록 조회중 오류", error)
-        res.status(500).json({ message: "서버 내부 오류발생" })
+        res.status(500).json({ message: "서버 오류" })
+
+    }
+})
+app.delete("/boards/:id", (req, res) => {
+    try {
+        const userId = Number(req.params.id)
+
+        const index = boards.findIndex(u => u.id === userId)
+
+        if (index == -1) {
+            return res.status(404).json({ message: "삭제할 게시글을 찾을수 없습니다." })
+        }
+        boards.splice(index,1)
+        boards.map((item, i)=>({
+            ...item,
+            displayId:idx+1
+        }))
+
+        res.status(200).json({ message: "삭제완료", boards })
+
+    } catch (error) {
+        res.status(500).json({ message: "서버 오류" })
+
     }
 })
 
