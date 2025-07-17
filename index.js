@@ -1,30 +1,21 @@
+// index.js
 const express = require("express");
-const bodyParser=require("body-parser")
-const logger=require("./customLogger")
-
-
 const app = express();
+const requestTime = require("./requestTime");
+const logRouter = require("./routes/log");
 
-app.use(bodyParser.json())
-app.use(express.json())
-app.use(logger)
+app.use(express.json());        // JSON 파싱
+app.use(requestTime);           // 요청 시간 기록 미들웨어
 
 
-// ⭐ 기본 미들웨어
-app.use((req, res, next) => {
-  console.log("요청이 들어왔습니다:", req.method, req.url);
-  next(); // 다음 미들웨어로 넘어감
-});
+app.use("/log", logRouter);     // log 라우터 연결
 
-app.post("/user",(req,res)=>{
-    const {name,age}=req.body;
-    res.send(`사용자 등록: ${name} (${age})`)
-})
+
 
 app.get("/", (req, res) => {
-  res.send("로그가 찍히는 홈페이지");
+  res.send("🎉 서버 실행 중 (GET /)");
 });
 
 app.listen(3000, () => {
-  console.log("서버 실행 중");
+  console.log("🚀 서버 실행: http://localhost:3000");
 });
