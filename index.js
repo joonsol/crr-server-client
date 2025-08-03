@@ -8,19 +8,19 @@ let books = [
         id: 1,
         title: "javascript",
         auther: "김**",
-        createdAt:"2024-01-02"
+        createdAt: "2024-01-02"
     },
     {
         id: 2,
         title: "html",
         auther: "김**",
-        createdAt:"2024-01-05"
+        createdAt: "2024-01-05"
     },
     {
         id: 3,
         title: "css",
         auther: "김**",
-        createdAt:"2024-04-05"
+        createdAt: "2024-04-05"
     },
 ]
 
@@ -32,22 +32,22 @@ app.get("/", (req, res) => {
 
 app.post('/books', (req, res) => {
     try {
- 
-        const {  title, auther } = req.body
-    // 유효성 검사
-    if (typeof title !== "string" || title.trim() === "") {
-      return res.status(400).json({ message: "title은 비어있지 않은 문자열이어야 합니다." });
-    }
-    if (typeof auther !== "string" || auther.trim() === "") {
-      return res.status(400).json({ message: "auther는 비어있지 않은 문자열이어야 합니다." });
-    }
-    const nextId = books.length? Math.max(...books.map(b=>b.id))+1 : 1
 
-     const newBook={
-            id:nextId,
-            title:title.trim(),
-            auther:auther.trim(),
-            createdAt:new Date().toISOString()
+        const { title, auther } = req.body
+        // 유효성 검사
+        if (typeof title !== "string" || title.trim() === "") {
+            return res.status(400).json({ message: "title은 비어있지 않은 문자열이어야 합니다." });
+        }
+        if (typeof auther !== "string" || auther.trim() === "") {
+            return res.status(400).json({ message: "auther는 비어있지 않은 문자열이어야 합니다." });
+        }
+        const nextId = books.length ? Math.max(...books.map(b => b.id)) + 1 : 1
+
+        const newBook = {
+            id: nextId,
+            title: title.trim(),
+            auther: auther.trim(),
+            createdAt: new Date().toISOString()
         }
 
 
@@ -71,7 +71,7 @@ app.get('/books/:id', (req, res) => {
         const bookId = Number(req.params.id)
 
         const index = books.findIndex(u => u.id === bookId)
-        if(index===-1){
+        if (index === -1) {
             res.status(404).json({ message: "유효하지 않은 id 값입니다." })
 
         }
