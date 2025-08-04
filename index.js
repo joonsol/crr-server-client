@@ -4,167 +4,160 @@ const PORT = 3000
 
 app.use(express.json())
 
+let posts = [
+    {
+        id: 1,
+        displayId: 1,
+        subject: "subject-1",     // 제목 대신 subject 사용
+        desc: "desc-1",           // 내용 대신 desc 사용
+        createdAt: "2025-08-01",  // 생성일
+        status: "draft",          // 상태: draft / published / archived
 
-let boards=[]
-let initId=1
+    },
+    {
+        id: 2,
+        displayId: 2,
+        subject: "subject-2",
+        desc: "desc-2",
+        createdAt: "2025-08-01",
+        status: "published",
+
+    },
+    {
+        id: 3,
+        displayId: 3,
+        subject: "subject-3",
+        desc: "desc-3",
+        createdAt: "2025-08-01",
+        status: "archived",
+
+    }
+];
+
+let initId = 4; // 다음 생성될 게시글 id 값
 
 
-app.post("/boards",(req,res)=>{
+// id로 배열 index 찾기 함수
+const findIndexById = (idParam) => posts.findIndex(p => p.id === Number(idParam));
+
+
+app.post('/posts', (req, res) => {
     try {
-        const newBoard={
-            id:initId++,
-            displayId:boards.length+1,
-            title:req.body.title,
-            content:req.body.content,
-            createdAt:new Date().toISOString()
+        const { subject, desc } = req.body
+        // subject, desc 유효성 검사
+        if (typeof subject !== "string" || subject.trim() === "" ||
+            typeof desc !== "string" || desc.trim() === "") {
+            return res.status(400).json({ message: "subject, desc는 비어있지 않은 문자열이어야 합니다." });
         }
-
-        boards.push(newBoard)
-
-        res.status(201).json({
-            message:"게시글 생성완료",
-            boards
-        })
+        const newPost = {
+            id: initId++,
+            displayId: posts.length + 1,
+            subject: subject.trim(),
+            desc: desc.trim(),
+            createdAt: new Date().toISOString(),
+            status: "draft",
+            likes: 0
+        }
+        posts.push(newPost)
+        res.status(201).json({ message: "게시글 생성 완료", posts });
     } catch (error) {
-        console.error("게시글 생성중 오류")
-        res.status(500).json({message:"서버오류"})
+        console.error("게시글 생성 중 오류", error);
+        res.status(500).json({ message: "서버 오류" });
     }
 })
-app.get("/boards",(req,res)=>{
+app.get('/posts', (req, res) => {
     try {
 
-        res.status(201).json({
-            message:"게시글 가져오기 완료",
-            boards
-        })
+        res.status(201).json({ message: "게시글 조회 완료", posts });
     } catch (error) {
-        console.error("게시글 가져오는중  오류")
-        res.status(500).json({message:"서버오류"})
+        console.error("게시글 조회 중 오류", error);
+        res.status(500).json({ message: "서버 오류" });
     }
 })
-app.get("/boards/:id",(req,res)=>{
+app.get('/posts/:id', (req, res) => {
     try {
-        const boardId = Number(req.params.id)
-        const index = boards.findIndex(u=>u.id===boardId)
+        const postId = Number(req.params.id)
 
-        if(index===-1){
-            res.status(404).json({message:"아이디가 없습니다."})
-        }
-    
+        const index = findIndexById(postId)
 
-        res.status(201).json({
-            message:"게시글 1개 가져오기 완료",
-           board: boards[index]
-        })
+        if (index === -1) return res.status(404).json({ message: "게시글 없음" })
+
+        res.status(201).json({ message: "게시글  1개 조회 완료", post: posts[index] });
     } catch (error) {
-        console.error("게시글 1개 가져오는중  오류")
-        res.status(500).json({message:"서버오류"})
+        console.error("게시글 1개 조회 중 오류", error);
+        res.status(500).json({ message: "서버 오류" });
     }
 })
-app.put("/boards/:id",(req,res)=>{
+app.put('/posts/:id', (req, res) => {
     try {
-        const boardId = Number(req.params.id)
-        const index = boards.findIndex(u=>u.id===boardId)
+        const postId = Number(req.params.id)
 
-        if(index===-1){
-            res.status(404).json({message:"아이디가 없습니다."})
+        const index = findIndexById(postId)
+
+        if (index === -1) return res.status(404).json({ message: "게시글 없음" })
+
+        const updatePost = req.body
+
+        posts[index] = {
+            ...posts[index],
+            ...updatePost
         }
-        const updateData= req.body
 
-        boards[index]={
-            ...boards[index],
-            ...updateData
-        }
-
-        res.status(201).json({
-            message:"게시글 수정하기 완료",
-           board: boards[index]
-        })
+        res.status(201).json({ message: "게시글 1개 수정  완료", post: posts[index] });
     } catch (error) {
-        console.error("게시글 수정하는 중  오류")
-        res.status(500).json({message:"서버오류"})
+        console.error("게시글 1개 수정중  오류", error);
+        res.status(500).json({ message: "서버 오류" });
     }
 })
-
-// title만 수정하기
-app.patch("/boards/:id/title",(req,res)=>{
+app.delete('/posts/:id', (req, res) => {
     try {
-        const boardId = Number(req.params.id)
-        const index = boards.findIndex(u=>u.id===boardId)
+        const postId = Number(req.params.id)
 
-        if(index===-1){
-            res.status(404).json({message:"아이디가 없습니다."})
-        }
-        const {title}= req.body
+        const index = findIndexById(postId)
 
-        if(typeof title !=="string" || title.trim()===""){
-            res.status(400).json({message:"타이틀은 비어있지 않은 문자열이어야 합니다."})
-        }
+        if (index === -1) return res.status(404).json({ message: "게시글 없음" })
 
-        boards[index]={
-            ...boards[index],
-            title:title.trim()
-        }
-        res.status(200).json({
-            message:"게시글  제목 수정하기 완료",
-           board: boards[index]
-        })
+        posts.splice(index, 1)
+        res.status(201).json({ message: "게시글 1개  삭제 완료", posts });
     } catch (error) {
-        console.error("게시글  제목 수정하는 중  오류")
-        res.status(500).json({message:"서버오류"})
+        console.error("게시글 1개  삭제  오류", error);
+        res.status(500).json({ message: "서버 오류" });
     }
 })
-// content만 수정하기
-app.patch("/boards/:id/content",(req,res)=>{
-    try {
-        const boardId = Number(req.params.id)
-        const index = boards.findIndex(u=>u.id===boardId)
-
-        if(index===-1){
-            res.status(404).json({message:"아이디가 없습니다."})
-        }
-        const {content}= req.body
-
-        if(typeof content !=="string" || content.trim()===""){
-            res.status(400).json({message:"타이틀은 비어있지 않은 문자열이어야 합니다."})
-        }
-
-        boards[index]={
-            ...boards[index],
-            content:content.trim()
-        }
-        res.status(200).json({
-            message:"게시글  제목 수정하기 완료",
-           board: boards[index]
-        })
-    } catch (error) {
-        console.error("게시글  제목 수정하는 중  오류")
-        res.status(500).json({message:"서버오류"})
-    }
-})
-app.delete("/boards/:id",(req,res)=>{
-    try {
-        const boardId = Number(req.params.id)
-        const index = boards.findIndex(u=>u.id===boardId)
-
-        if(index===-1){
-            res.status(404).json({message:"아이디가 없습니다."})
-        }
-        boards.splice(index,1)
-
-        res.status(201).json({
-            message:"게시글 삭제하기 완료",
-            boards
-        })
-    } catch (error) {
-        console.error("게시글 삭제하는 중  오류")
-        res.status(500).json({message:"서버오류"})
-    }
-})
-
 
 app.get("/", (req, res) => { // 루트 경로에 GET 요청 시
     res.send("Hello Express!") // 응답으로 문자열 반환
+})
+
+
+// subject
+app.patch('/posts/:id/status', (req, res) => {
+    try {
+        const postId = Number(req.params.id)
+
+        const index = findIndexById(postId)
+
+        if (index === -1) return res.status(404).json({ message: "게시글 없음" })
+
+        const { status } = req.body
+        const ALLOWED = ["draft", "published", "archived"];
+
+        if (!ALLOWED.includes(status)) {
+            return res.status(400).json({ message: `status는 ${ALLOWED.join(", ")} 중 하나여야 합니다.` });
+        }
+
+
+
+        posts[index] = {
+            ...posts[index],
+            status
+        }
+
+        res.status(201).json({ message: "상태변경 완료", post: posts[index] });
+    } catch (error) {
+        console.error("상태변경  오류", error);
+        res.status(500).json({ message: "서버 오류" });
+    }
 })
 
 app.listen(PORT, () => {// 3000번 포트에서 서버 시작
