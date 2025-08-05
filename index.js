@@ -1,10 +1,12 @@
 const express = require("express");
 const app = express();
 const PORT = 3000;
-const boardRouter = require("./routes/board")
+const characterRouter= require("./routes/character")
+
+
 
 app.use(express.json())
-app.use('/boards',boardRouter)
+app.use("/characters",characterRouter)
 
 app.get("/", (req, res) => {
   res.send("Hello, world");
