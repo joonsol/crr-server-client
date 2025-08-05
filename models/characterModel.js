@@ -1,18 +1,30 @@
+// models/character.js
 
-const characters = [
+const mongoose = require("mongoose");
+
+// 캐릭터 스키마 정의
+const characterSchema = new mongoose.Schema(
   {
-    id: 1,
-    name: "아처",
-    level: 10,
-    isOnline: true
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    level: {
+      type: Number,
+      required: true,
+    },
+    isOnline: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
-    id: 2,
-    name: "워리어",
-    level: 15,
-    isOnline: false
+    timestamps: true, // createdAt, updatedAt 자동 생성
   }
-];
+);
 
+// "Character" 모델 생성 → 컬렉션명은 "characters"
+const Character = mongoose.model("Character", characterSchema);
 
-module.exports = characters;
+module.exports = Character;
