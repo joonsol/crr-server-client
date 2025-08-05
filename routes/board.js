@@ -45,7 +45,7 @@ router.post("/", (req, res) => {
 
     boards.push(newBoard); // 게시글 추가
 
-    res.status(201).json({ message: "게시글 등록 성공", board: newBoard });
+    res.status(201).json({ message: "게시글 등록 성공", boards});
   } catch (error) {
     res.status(500).json({ message: "서버오류" });
   }
