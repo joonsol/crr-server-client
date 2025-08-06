@@ -22,7 +22,7 @@ mongoose
 
 // ⑤ 라우터 연결
 const characterRoutes = require("./routes/character");
-app.use("/api/characters", characterRoutes);
+app.use("/char", characterRoutes);
 
 
 app.get("/", (req, res) => {
