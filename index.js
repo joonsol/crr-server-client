@@ -21,9 +21,9 @@ mongoose
 
 
 // ⑤ 라우터 연결
-const characterRoutes = require("./routes/character");
-app.use("/char", characterRoutes);
-
+// 라우트 연결
+const postRoutes = require("./routes/postRoutes");
+app.use("/api/posts", postRoutes);
 
 app.get("/", (req, res) => {
   res.send("Hello, world");
